@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tory — Fullstack Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Calibre:wght@400;500;600&family=SF+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <!-- Fallback fonts since Calibre isn't on Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --bg-light:  #161b22;
+      --navy:      #112240;
+      --slate:     #8892b0;
+      --slate-light: #a8b2d8;
+      --white:     #ccd6f6;
+      --white-pure:#e6f1ff;
+      --accent:    #64ffda;
+      --accent-dim: rgba(100,255,218,0.1);
+      --font-sans: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --transition: all 0.25s cubic-bezier(0.645,0.045,0.355,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--slate);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.3;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    ::selection { background: rgba(100,255,218,0.2); color: var(--accent); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
+
+    a { color: var(--accent); text-decoration: none; transition: var(--transition); }
+    a:hover { color: var(--accent); }
+
+    /* ─── CURSOR ──────────────────────────────────────────── */
+    #cursor-dot,
+    #cursor-ring {
+      position: fixed;
+      pointer-events: none;
+      z-index: 99999;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s;
+    }
+    #cursor-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+    }
+    #cursor-ring {
+      width: 40px; height: 40px;
+      border: 1.5px solid rgba(100,255,218,0.5);
+      transition: width 0.2s, height 0.2s, border-color 0.2s;
+    }
+    body.cursor-hover #cursor-ring {
+      width: 56px; height: 56px;
+      border-color: var(--accent);
+      background: rgba(100,255,218,0.05);
+    }
+
+    /* ─── PARALLAX BACKGROUND LAYERS ─────────────────────── */
+    #bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      will-change: transform;
+      transition: transform 0.08s linear;
+    }
+    .blob-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #64ffda, transparent 70%);
+      top: -100px; left: -100px;
+    }
+    .blob-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #0080ff, transparent 70%);
+      bottom: 100px; right: -50px;
+      opacity: 0.08;
+    }
+    .blob-3 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, #bd34fe, transparent 70%);
+      top: 50%; left: 50%;
+      opacity: 0.06;
+    }
+
+    /* Grid overlay */
+    #bg-layer::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(100,255,218,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100,255,218,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ─── LAYOUT ──────────────────────────────────────────── */
+    #app {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      min-height: 100vh;
+      gap: 0 4rem;
+    }
+
+    /* ─── LEFT PANEL (STICKY) ─────────────────────────────── */
+    #left-panel {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 6rem 0;
+    }
+
+    .name {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--white-pure);
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.6rem;
+    }
+
+    .title {
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+      letter-spacing: 0.01em;
+    }
+
+    .tagline {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--slate);
+      max-width: 280px;
+      margin-bottom: 3.5rem;
+    }
+
+    /* ─── NAV ─────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+      padding: 4px 0;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .nav-line {
+      display: block;
+      height: 1px;
+      background: var(--slate);
+      width: 32px;
+      transition: var(--transition);
+    }
+
+    .nav-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--slate);
+      transition: var(--transition);
+    }
+
+    .nav-item.active .nav-line,
+    .nav-item:hover .nav-line {
+      width: 64px;
+      background: var(--white-pure);
+    }
+
+    .nav-item.active .nav-label,
+    .nav-item:hover .nav-label {
+      color: var(--white-pure);
+    }
+
+    /* ─── SOCIAL ICONS ────────────────────────────────────── */
+    .social-links {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding-top: 1rem;
+    }
+
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      color: var(--slate);
+      transition: var(--transition);
+    }
+
+    .social-links a:hover {
+      color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .social-links svg {
+      width: 20px; height: 20px;
+      fill: currentColor;
+    }
+
+    /* ─── RIGHT CONTENT ───────────────────────────────────── */
+    #right-content {
+      padding: 6rem 0 8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    section {
+      padding: 5rem 0;
+      scroll-margin-top: 0;
+    }
+
+    section:first-child { padding-top: 0; }
+
+    /* ─── SECTION HEADER (mobile) ─────────────────────────── */
+    .section-label {
+      display: none;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      display: block;
+      flex: 1;
+      height: 1px;
+      background: rgba(100,255,218,0.2);
+    }
+
+    /* ─── ABOUT ───────────────────────────────────────────── */
+    #about p {
+      font-size: 1rem;
+      line-height: 1.85;
+      color: var(--slate);
+      margin-bottom: 1.4rem;
+    }
+
+    #about p:last-child { margin-bottom: 0; }
+
+    #about strong {
+      color: var(--white-pure);
+      font-weight: 600;
+    }
+
+    #about a {
+      color: var(--accent);
+      border-bottom: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    #about a:hover {
+      border-bottom-color: var(--accent);
+    }
+
+    /* ─── EXPERIENCE ──────────────────────────────────────── */
+    .exp-item {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 0 1.5rem;
+      padding: 1.5rem;
+      border-radius: 6px;
+      transition: var(--transition);
+      position: relative;
+      margin-bottom: 0.25rem;
+    }
+
+    .exp-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .exp-item:hover {
+      background: rgba(100,255,218,0.04);
+    }
+
+    .exp-item:hover::before {
+      border-color: rgba(100,255,218,0.12);
+    }
+
+    .exp-date {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--slate);
+      text-transform: uppercase;
+      padding-top: 4px;
+      white-space: nowrap;
+    }
+
+    .exp-body {}
+
+    .exp-role {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .exp-role a {
+      color: var(--white);
+      transition: var(--transition);
+    }
+
+    .exp-role a:hover { color: var(--accent); }
+
+    .exp-role .arrow {
+      font-size: 0.8rem;
+      color: var(--accent);
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: var(--transition);
+      display: inline-block;
+    }
+
+    .exp-item:hover .arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .exp-desc {
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: var(--slate);
+      margin-bottom: 1rem;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag {
+      display: inline-block;
+      background: rgba(100,255,218,0.08);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(100,255,218,0.15);
+    }
+
+    /* ─── PROJECTS ────────────────────────────────────────── */
+    .project-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 0 1.5rem;
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-bottom: 0.25rem;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .project-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .project-item:hover {
+      background: rgba(100,255,218,0.04);
+    }
+
+    .project-item:hover::before {
+      border-color: rgba(100,255,218,0.12);
+    }
+
+    .project-img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 4px;
+      background: var(--bg-light);
+      border: 1px solid rgba(100,255,218,0.1);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .project-img-inner {
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      color: var(--accent);
+      opacity: 0.4;
+    }
+
+    .project-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .project-title a {
+      color: var(--white);
+      transition: var(--transition);
+    }
+
+    .project-title a:hover { color: var(--accent); }
+
+    .project-title .arrow {
+      font-size: 0.8rem;
+      color: var(--accent);
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: var(--transition);
+    }
+
+    .project-item:hover .arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .project-desc {
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: var(--slate);
+      margin-bottom: 0.9rem;
+    }
+
+    /* view all link */
+    .view-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-top: 2rem;
+      padding: 0.8rem 1.5rem;
+      transition: var(--transition);
+    }
+
+    .view-all:hover {
+      color: var(--accent);
+      gap: 0.7rem;
+    }
+
+    /* ─── FOOTER ──────────────────────────────────────────── */
+    footer {
+      padding: 3rem 0 0;
+      font-size: 0.78rem;
+      color: var(--slate);
+      line-height: 1.8;
+    }
+
+    footer a {
+      color: var(--white);
+      font-weight: 500;
+      border-bottom: 1px solid rgba(100,255,218,0.3);
+      transition: var(--transition);
+    }
+
+    footer a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ─── ANIMATIONS ──────────────────────────────────────── */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      opacity: 0;
+      animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.45s; }
+    .delay-5 { animation-delay: 0.6s; }
+    .delay-6 { animation-delay: 0.75s; }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 900px) {
+      #app {
+        grid-template-columns: 1fr;
+        padding: 0 1.5rem;
+      }
+
+      #left-panel {
+        position: relative;
+        height: auto;
+        padding: 4rem 0 2rem;
+      }
+
+      #right-content { padding-top: 2rem; }
+
+      .section-label { display: flex; }
+
+      .tagline { max-width: 100%; }
+
+      .exp-item,
+      .project-item { grid-template-columns: 1fr; }
+
+      .exp-date { padding-bottom: 0.4rem; }
+
+      .project-img { display: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Parallax Background -->
+  <div id="bg-layer">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+  </div>
+
+  <!-- App Layout -->
+  <div id="app">
+
+    <!-- LEFT: Sticky Panel -->
+    <div id="left-panel">
+
+      <div>
+        <h1 class="name fade-in delay-1">Idowu <br/>Victor</h1>
+        <h2 class="title fade-in delay-2">Frontend Engineer | React & TypeScript</h2>
+        <p class="tagline fade-in delay-3">
+          I build scalable, production-grade digital<br />
+          experiences for the web — and beyond.
+        </p>
+
+        <nav id="main-nav" class="fade-in delay-4">
+          <a href="#about"      class="nav-item active" data-section="about">
+            <span class="nav-line"></span>
+            <span class="nav-label">About</span>
+          </a>
+          <a href="#experience" class="nav-item" data-section="experience">
+            <span class="nav-line"></span>
+            <span class="nav-label">Experience</span>
+          </a>
+          <a href="#projects"   class="nav-item" data-section="projects">
+            <span class="nav-line"></span>
+            <span class="nav-label">Projects</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="social-links fade-in delay-6">
+        <!-- GitHub -->
+        <a href="https://github.com/TORY-SKY" target="_blank" rel="noopener" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+          </svg>
+        </a>
+        <!-- LinkedIn -->
+        <a href="https://ng.linkedin.com/in/victor-idowu-b911b4193" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </a>
+        <!-- Twitter / X -->
+        <a href="https://x.com/VictorIdowu16" target="_blank" rel="noopener" aria-label="Twitter">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+        <!-- CodePen -->
+        <a href="https://codepen.io/" target="_blank" rel="noopener" aria-label="CodePen">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.144 13.067v-2.134L16.55 12zm1.276 1.194a.628.628 0 01-.006.083l-.005.028-.011.053-.01.031c-.005.016-.01.031-.017.047l-.014.03a.78.78 0 01-.021.043l-.019.03a.57.57 0 01-.08.1l-.026.025a.602.602 0 01-.036.03l-.029.022-.01.008-6.985 4.756a.638.638 0 01-.708 0L4.864 14.97l-.01-.008a.649.649 0 01-.065-.052l-.026-.025-.032-.034-.021-.028a.588.588 0 01-.067-.11l-.014-.031a.644.644 0 01-.017-.047l-.01-.031-.01-.053-.006-.028a.628.628 0 01-.006-.083V9.739a.638.638 0 01.006-.083l.005-.028.011-.053.01-.031c.005-.016.01-.032.017-.047l.014-.03a.78.78 0 01.021-.043l.019-.03a.57.57 0 01.08-.1l.026-.025a.602.602 0 01.036-.03l.029-.022.01-.008 6.985-4.756a.638.638 0 01.708 0l6.985 4.756.01.008.029.022a.486.486 0 01.036.03l.026.025c.022.022.043.046.062.072l.011.016.009.012a.639.639 0 01.088.186l.01.031.01.053.006.028a.628.628 0 01.006.083zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 10.492L9.745 12 12 13.51 14.255 12zm.638 4.124l4.898-3.349 1.609 1.097-6.507 4.429zm-1.276 0l-6.507-4.421 1.609-1.097 4.898 3.349zm7.411-4.836L17.165 8.4l-4.527 3.085V5.813zM11.362 5.813v5.672L6.835 8.4 5.227 9.78zm-6.68 3.965l1.609-1.096v2.194zm11.64 4.79l-4.898-3.349 4.898-3.349v6.698z"/>
+          </svg>
+        </a>
+        <!-- Email -->
+        <a href="mailto:ezevictor559@example.com" aria-label="Email">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+        </a>
+      </div>
+
+    </div><!-- end left-panel -->
+
+    <!-- RIGHT: Scrollable Content -->
+    <div id="right-content">
+
+      <!-- ABOUT -->
+      <section id="about">
+        <div class="section-label">About</div>
+
+        <p>
+          I'm a <strong>Frontend engineer</strong> and electrical engineering student, focused on
+          building scalable, production-ready digital products. I enjoy working at
+          the intersection of <strong>systems thinking and great user experience</strong> —
+          where clean architecture meets interfaces people actually love using.
+        </p>
+
+        <p>
+          I'm actively building <a href="#projects">an AI-powered customer support
+          automation service</a> — a multi-tenant SaaS product with real-time ticket
+          routing and LLM-based resolution. This project has sharpened my fullstack
+          instincts across backend design, database modeling, and production deployment.
+        </p>
+
+        <p>
+          My technical toolkit spans <strong>React, TypeScript, Tailwindcss, ContextAPI, AI Integration, Node.js, Express,
+          and Supabase</strong>. I'm currently deepening my backend knowledge —
+          system design, Docker, DevOps — to become a well-rounded engineer who can
+          own a product end-to-end.
+        </p>
+
+        <p>
+          Outside of code, you'll find me debugging circuits for university lab
+          assignments, obsessing over clean code principles, or reverse-engineering
+          how great products are built — then building something better.
+        </p>
+      </section>
+
+      <!-- EXPERIENCE -->
+      <section id="experience">
+        <div class="section-label">Experience</div>
+
+        <div class="exp-item">
+  <div class="exp-date">2024 — 2025</div>
+  <div class="exp-body">
+    <div class="exp-role">
+      Frontend Engineer Intern ·
+      <a href="https://hng.tech" target="_blank" rel="noopener">
+        HNG Internship
+      </a>
+      <span class="arrow">↗</span>
+    </div>
+
+    <p class="exp-desc">
+      Collaborated with cross-functional engineering teams to build and ship
+      production-ready web applications during the HNG Internship program.
+      Implemented responsive interfaces using modern React architecture,
+      optimized application performance, and integrated REST APIs for
+      real-world product features used by thousands of users.
+    </p>
+
+    <div class="tech-tags">
+      <span class="tag">React</span>
+      <span class="tag">TypeScript</span>
+      <span class="tag">Tailwind</span>
+      <span class="tag">REST APIs</span>
+      <span class="tag">Git</span>
+    </div>
+  </div>
+</div>
+
+
+<div class="exp-item">
+  <div class="exp-date">2023 — 2024</div>
+  <div class="exp-body">
+    <div class="exp-role">
+      Frontend Developer ·
+      <a href="#" target="_blank" rel="noopener">
+        CyberBuddies Nigeria
+      </a>
+      <span class="arrow">↗</span>
+    </div>
+
+    <p class="exp-desc">
+      Developed modern user interfaces for digital platforms focused on
+      usability and performance. Worked closely with designers and backend
+      developers to translate product requirements into scalable frontend
+      architecture while maintaining clean code standards and responsive
+      layouts across devices.
+    </p>
+
+    <div class="tech-tags">
+      <span class="tag">React</span>
+      <span class="tag">JavaScript</span>
+      <span class="tag">CSS</span>
+      <span class="tag">UI Engineering</span>
+    </div>
+  </div>
+</div>
+
+
+<div class="exp-item">
+  <div class="exp-date">2025 — Present</div>
+  <div class="exp-body">
+    <div class="exp-role">
+      Frontend Engineer ·
+      <a href="https://elycapfracprop.com/" target="_blank" rel="noopener">
+        ElycapFracProp
+      </a>
+      <span class="arrow">↗</span>
+    </div>
+
+    <p class="exp-desc">
+      Built and launched a property investment platform enabling users to
+      invest in fractional real estate assets online. Designed the frontend
+      architecture, implemented responsive user dashboards, integrated
+      payment flows, and optimized performance to support real user
+      transactions and account management.
+    </p>
+
+    <div class="tech-tags">
+      <span class="tag">React</span>
+      <span class="tag">TypeScript</span>
+      <span class="tag">Tailwind</span>
+      <span class="tag">API Integration</span>
+      <span class="tag">Vercel</span>
+    </div>
+  </div>
+</div>
+        
+
+        <a href="#" class="view-all">
+          View Full Résumé ↗
+        </a>
+      </section>
+
+      <!-- PROJECTS -->
+      <section id="projects">
+        <div class="section-label">Projects</div>
+
+        <div class="project-item">
+  <div class="project-img">
+    <div class="project-img-inner">🏠</div>
+  </div>
+
+  <div>
+    <div class="project-title">
+      <a href="https://elycapfracprop.com/" target="_blank" rel="noopener">
+        ElycapFracProp — Property Investment Platform
+      </a>
+      <span class="arrow">↗</span>
+    </div>
+
+    <p class="project-desc">
+      A real-world property investment platform that allows users to invest
+      in fractional real estate assets online. Built a scalable frontend
+      architecture with responsive dashboards, authentication flows,
+      and dynamic data integration for property listings and investment
+      tracking.
+    </p>
+
+    <div class="tech-tags">
+      <span class="tag">React</span>
+      <span class="tag">TypeScript</span>
+      <span class="tag">Tailwind</span>
+      <span class="tag">API Integration</span>
+    </div>
+  </div>
+</div>
+        <div class="project-item">
+  <div class="project-img">
+    <div class="project-img-inner">🤖</div>
+  </div>
+
+  <div>
+    <div class="project-title">
+      <a href="#" target="_blank" rel="noopener">
+        AI Customer Support Automation
+      </a>
+      <span class="arrow">↗</span>
+    </div>
+
+    <p class="project-desc">
+      A multi-tenant SaaS platform that automates customer support using
+      large language models. Built with a modern React frontend and a
+      Node.js backend with Supabase. Features intelligent ticket routing,
+      conversation summarization, and real-time support analytics.
+    </p>
+
+    <div class="tech-tags">
+      <span class="tag">React</span>
+      <span class="tag">Node.js</span>
+      <span class="tag">Supabase</span>
+      <span class="tag">AI APIs</span>
+    </div>
+  </div>
+</div>
+
+        <!-- <div class="project-item">
+          <div class="project-img">
+            <div class="project-img-inner">🔌</div>
+          </div>
+          <div>
+            <div class="project-title">
+              <a href="#" target="_blank" rel="noopener">Circuit Simulator Engine</a>
+              <span class="arrow">↗</span>
+            </div>
+            <p class="project-desc">
+              Browser-based SPICE-like electrical circuit simulator. Drag-and-drop
+              component placement, real-time nodal analysis, and oscilloscope view.
+              Used by classmates for university coursework.
+            </p>
+            <div class="tech-tags">
+              <span class="tag">TypeScript</span>
+              <span class="tag">Canvas API</span>
+              <span class="tag">Linear Algebra</span>
+            </div>
+          </div>
+        </div> -->
+
+        <a href="https://github.com/" target="_blank" rel="noopener" class="view-all">
+          View Full Project Archive ↗
+        </a>
+      </section>
+
+      <!-- FOOTER -->
+      <footer>
+        <p>
+          Designed &amp; built by <strong>Tory</strong> — inspired by
+          <a href="https://brittanychiang.com" target="_blank" rel="noopener">Brittany Chiang</a>.
+          Built with semantic HTML, vanilla CSS, and zero frameworks. Deployed on
+          <a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a>.
+        </p>
+      </footer>
+
+    </div><!-- end right-content -->
+
+  </div><!-- end app -->
+
+  <script>
+    /* ─────────────────────────────────────────────────────────
+       CURSOR
+    ───────────────────────────────────────────────────────── */
+    const dot  = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    let mouseX = 0, mouseY = 0;
+    let ringX  = 0, ringY  = 0;
+    let raf;
+
+    document.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.left = mouseX + 'px';
+      dot.style.top  = mouseY + 'px';
+    });
+
+    // Smooth ring follow
+    function animateCursor() {
+      ringX += (mouseX - ringX) * 0.1;
+      ringY += (mouseY - ringY) * 0.12;
+      ring.style.left = ringX + 'px';
+      ring.style.top  = ringY + 'px';
+      raf = requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Hover effect on interactive elements
+    document.querySelectorAll('a, button, [data-hover]').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+
+    /* ─────────────────────────────────────────────────────────
+       PARALLAX MOUSE EFFECT
+    ───────────────────────────────────────────────────────── */
+    const blobs = document.querySelectorAll('.bg-blob');
+    const parallaxStrength = [0.025, -0.018, 0.012];
+
+    document.addEventListener('mousemove', e => {
+      const cx = window.innerWidth  / 2;
+      const cy = window.innerHeight / 2;
+      const dx = e.clientX - cx;
+      const dy = e.clientY - cy;
+
+      blobs.forEach((blob, i) => {
+        const s = parallaxStrength[i];
+        blob.style.transform = `translate(${dx * s}px, ${dy * s}px)`;
+      });
+    });
+
+    /* ─────────────────────────────────────────────────────────
+       SCROLL SPY — highlights active nav item on scroll
+    ───────────────────────────────────────────────────────── */
+    const sections = document.querySelectorAll('section[id]');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -60% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.section === id);
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ─────────────────────────────────────────────────────────
+       SMOOTH SCROLL on nav click
+    ───────────────────────────────────────────────────────── */
+    navItems.forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.getElementById(item.dataset.section);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    /* ─────────────────────────────────────────────────────────
+       STAGGER FADE-IN on exp/project items
+    ───────────────────────────────────────────────────────── */
+    const itemObserver = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '0';
+          entry.target.style.transform = 'translateY(16px)';
+          entry.target.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, 60);
+          itemObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.exp-item, .project-item').forEach(el => {
+      el.style.opacity = '0';
+      itemObserver.observe(el);
+    });
+  </script>
+
+</body>
+</html>
+
