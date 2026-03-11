@@ -573,7 +573,22 @@
 
       .project-img { display: none; }
     }
+    /*display image*/
+    .profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(100,255,218,0.4);
+  margin-bottom: 1.5rem;
+}
+.profile-img {
+  transition: transform 0.3s ease;
+}
 
+.profile-img:hover {
+  transform: scale(1.05);
+}
   </style>
 </head>
 <body>
@@ -596,6 +611,7 @@
     <div id="left-panel">
 
       <div>
+        <img src="vic.jpg" alt="Victor Idowu" class="profile-img" />
         <h1 class="name fade-in delay-1">Idowu <br/>Victor</h1>
         <h2 class="title fade-in delay-2">Frontend Engineer | React & TypeScript</h2>
         <p class="tagline fade-in delay-3">
@@ -801,7 +817,9 @@
       <a href="https://elycapfracprop.com/" target="_blank" rel="noopener">
         ElycapFracProp — Property Investment Platform
       </a>
+      <a href="https://elycapfracprop.com/" target="_blank" rel="noopener">
       <span class="arrow">↗</span>
+      </a>
     </div>
 
     <p class="project-desc">
