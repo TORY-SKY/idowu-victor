@@ -589,6 +589,34 @@
 .profile-img:hover {
   transform: scale(1.05);
 }
+
+
+
+
+/*totally unrelated*/
+.blob{
+    width: 500px; height: 500px;
+    position: absolute;
+    transition: transform 0.7s linear;
+        background: radial-gradient(circle, yellow, transparent 80%);
+        opacity: 0.19;
+        top: 50%; left: 50%;
+
+
+  }
+  .bg-layer::after{
+    /*width: 100%;*/
+    /*min-height: 100vh;*/
+    overflow: hidden;
+    position: absolute;
+    inset: 0;
+    content: "";
+    z-index: 0;
+    background-image: linear-gradient( rgba(100, 255, 218, 0.026) 10px, transparent 12px), linear-gradient(90deg, rgba(100, 255, 218, 0.026) 10px, transparent 1px);
+    background-size: 60px 60px;
+
+
+  }
   </style>
 </head>
 <body>
@@ -602,6 +630,8 @@
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
+    <div class=" blob"></div>
+
   </div>
 
   <!-- App Layout -->
@@ -1019,6 +1049,59 @@
       el.style.opacity = '0';
       itemObserver.observe(el);
     });
+
+    let windowsWidth = window.innerWidth;
+  let windowsHeight= window.innerHeight;
+  let blob = document.querySelector(".blob");
+  let blobPosition  = blob.getBoundingClientRect();
+
+  let randomX = 0;
+  let randomY = 0
+  // let rect = blob.style.transform =  `translate(${randomX}px, ${randomY}px)`
+
+
+  const colors = [
+      'yellow',
+  '#64ffda',
+  '#0080ff',
+  '#bd34fe',
+  'orange',
+  'red'
+  ];
+  // compute the area of the blob
+  function BlobArea(w, h){
+    const pi = Math.PI;
+    // get the width of the circle 
+    const Radius = w/2;
+    let area = pi * (Radius*Radius);
+    let peremiter  = 2 *pi * Radius
+    return Radius;
+  }
+   BlobArea(blobPosition.width, blobPosition.height);
+   console.log(BlobArea(windowsWidth, windowsHeight) - BlobArea(blobPosition.width, blobPosition.height));
+
+  let index=0;
+setInterval(()=>{
+    blob.style.background = `radial-gradient(circle, ${colors[index]}, transparent 80%)`;
+      index = (index + 1) % colors.length; 
+    let blobWidth = blobPosition.width;
+    let blobHeight = blobPosition.height;
+
+
+      randomX = Math.floor((Math.random() * (BlobArea(windowsWidth, windowsHeight) - BlobArea(blobPosition.width, blobPosition.height))));
+    randomY = Math.floor((Math.random() * BlobArea(windowsWidth, windowsHeight) - BlobArea(blobPosition.width, blobPosition.height)));
+    console.log({windowsWidth: windowsWidth});
+    console.log({windowsHeight: windowsWidth});
+
+
+    
+
+  blob.style.transform = `translate( ${randomX -(BlobArea(windowsWidth, windowsHeight))}px, ${randomY}px)`;
+  // randomX;
+  console.log({randomX: randomX, randomY: randomY});
+
+      // alert( windowsWidth - blobPosition.x);
+  }, 1000)
   </script>
 
 </body>
